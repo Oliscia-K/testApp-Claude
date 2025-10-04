@@ -1,4 +1,63 @@
+'use client';
+
+import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+
 export default function Home() {
+  const router = useRouter();
+  const [email, setEmail] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+
+  useEffect(() => {
+    // Check if user is already logged in
+    const currentUser = localStorage.getItem('currentUser');
+    if (currentUser) {
+      const userData = JSON.parse(currentUser);
+      router.push(`/matches?userId=${userData.userId}`);
+    }
+  }, [router]);
+
+  const handleLogin = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    setError('');
+
+    if (!email.endsWith('.edu')) {
+      setError('Please use a valid .edu email address');
+      setLoading(false);
+      return;
+    }
+
+    try {
+      const response = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        // Store user session
+        localStorage.setItem('currentUser', JSON.stringify(data.user));
+
+        // Redirect based on whether profile exists
+        if (data.user.hasProfile) {
+          router.push(`/matches?userId=${data.user.userId}`);
+        } else {
+          router.push(`/profile/setup?email=${encodeURIComponent(email)}`);
+        }
+      } else {
+        setError(data.error || 'Login failed');
+        setLoading(false);
+      }
+    } catch (err) {
+      setError('Error during login. Please try again.');
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white">
       {/* Hero Section */}
@@ -11,19 +70,30 @@ export default function Home() {
             Connect with classmates, discover study groups, and collaborate on projects.
             Co-Lab makes academic collaboration simple and effective.
           </p>
-          <div className="flex gap-4 justify-center">
-            <a
-              href="/profile/setup"
-              className="bg-blue-600 text-white px-8 py-3 rounded-lg text-lg font-semibold hover:bg-blue-700 transition"
-            >
-              Get Started
-            </a>
-            <a
-              href="/matches?userId=demo"
-              className="bg-white text-blue-600 px-8 py-3 rounded-lg text-lg font-semibold border-2 border-blue-600 hover:bg-blue-50 transition"
-            >
-              Browse Matches
-            </a>
+
+          {/* Login Form */}
+          <div className="max-w-md mx-auto bg-white p-8 rounded-lg shadow-lg mb-8">
+            <h2 className="text-2xl font-semibold mb-4">Sign In with Your .edu Email</h2>
+            <form onSubmit={handleLogin} className="space-y-4">
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="your.email@university.edu"
+                required
+                className="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              />
+              {error && (
+                <p className="text-red-600 text-sm">{error}</p>
+              )}
+              <button
+                type="submit"
+                disabled={loading}
+                className="w-full bg-blue-600 text-white px-8 py-3 rounded-lg text-lg font-semibold hover:bg-blue-700 transition disabled:opacity-50"
+              >
+                {loading ? 'Signing In...' : 'Sign In / Sign Up'}
+              </button>
+            </form>
           </div>
         </div>
 

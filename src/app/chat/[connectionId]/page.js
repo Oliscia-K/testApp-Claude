@@ -1,21 +1,33 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useSearchParams } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 
 export default function ChatPage({ params }) {
-  const searchParams = useSearchParams();
-  const userId = searchParams.get('userId');
+  const router = useRouter();
   const { connectionId } = params;
-
+  const [userId, setUserId] = useState(null);
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState('');
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
 
   useEffect(() => {
+    // Get userId from localStorage
+    const currentUser = localStorage.getItem('currentUser');
+    if (!currentUser) {
+      router.push('/');
+      return;
+    }
+
+    const userData = JSON.parse(currentUser);
+    setUserId(userData.userId);
+  }, [router]);
+
+  useEffect(() => {
+    if (!userId) return;
     fetchMessages();
-  }, [connectionId]);
+  }, [connectionId, userId]);
 
   async function fetchMessages() {
     try {

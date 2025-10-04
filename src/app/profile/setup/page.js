@@ -1,14 +1,33 @@
 'use client';
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState, useEffect } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 
 export default function ProfileSetup() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
   const [courses, setCourses] = useState('');
   const [interests, setInterests] = useState('');
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
+
+  useEffect(() => {
+    // Get user info from localStorage or URL params
+    const currentUser = localStorage.getItem('currentUser');
+    if (currentUser) {
+      const userData = JSON.parse(currentUser);
+      setEmail(userData.email || '');
+      setName(userData.name || '');
+    } else {
+      const emailParam = searchParams.get('email');
+      if (emailParam) {
+        setEmail(emailParam);
+        setName(emailParam.split('@')[0]);
+      }
+    }
+  }, [searchParams]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -19,21 +38,37 @@ export default function ProfileSetup() {
       const coursesArray = courses.split(',').map(c => c.trim()).filter(Boolean);
       const interestsArray = interests.split(',').map(i => i.trim()).filter(Boolean);
 
-      const userId = 'user-' + Date.now(); // Temporary until auth is implemented
+      // Get userId from localStorage or create new one
+      let userId;
+      const currentUser = localStorage.getItem('currentUser');
+      if (currentUser) {
+        userId = JSON.parse(currentUser).userId;
+      } else {
+        userId = email.split('@')[0] + '-' + Date.now();
+      }
 
       const response = await fetch('/api/profile', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           userId,
+          name,
+          email,
           courses: coursesArray,
           interests: interestsArray,
         }),
       });
 
       if (response.ok) {
+        // Update localStorage with complete user info
+        localStorage.setItem('currentUser', JSON.stringify({
+          userId,
+          name,
+          email,
+          hasProfile: true,
+        }));
+
         setMessage('Profile saved successfully! Redirecting...');
-        // Redirect to matches page after 1 second
         setTimeout(() => {
           router.push(`/matches?userId=${userId}`);
         }, 1000);
@@ -53,6 +88,34 @@ export default function ProfileSetup() {
         <h1 className="text-2xl font-bold mb-6">Complete Your Profile</h1>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
+            <label htmlFor="name" className="block text-sm font-medium mb-2">
+              Your Name
+            </label>
+            <input
+              type="text"
+              id="name"
+              name="name"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="e.g. John Doe"
+              required
+              className="w-full px-3 py-2 border rounded"
+            />
+          </div>
+          <div>
+            <label htmlFor="email" className="block text-sm font-medium mb-2">
+              Email
+            </label>
+            <input
+              type="email"
+              id="email"
+              name="email"
+              value={email}
+              readOnly
+              className="w-full px-3 py-2 border rounded bg-gray-50"
+            />
+          </div>
+          <div>
             <label htmlFor="courses" className="block text-sm font-medium mb-2">
               Courses (comma separated)
             </label>
@@ -63,6 +126,7 @@ export default function ProfileSetup() {
               value={courses}
               onChange={(e) => setCourses(e.target.value)}
               placeholder="e.g. CS101, MATH201"
+              required
               className="w-full px-3 py-2 border rounded"
             />
           </div>
@@ -77,6 +141,7 @@ export default function ProfileSetup() {
               value={interests}
               onChange={(e) => setInterests(e.target.value)}
               placeholder="e.g. Machine Learning, Web Development"
+              required
               className="w-full px-3 py-2 border rounded"
             />
           </div>

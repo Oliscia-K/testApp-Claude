@@ -1,22 +1,29 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useSearchParams } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 
 export default function ConnectionsPage() {
-  const searchParams = useSearchParams();
-  const userId = searchParams.get('userId');
-
+  const router = useRouter();
+  const [userId, setUserId] = useState(null);
   const [connections, setConnections] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
   useEffect(() => {
-    if (!userId) {
-      setError('User ID is required');
-      setLoading(false);
+    // Get userId from localStorage
+    const currentUser = localStorage.getItem('currentUser');
+    if (!currentUser) {
+      router.push('/');
       return;
     }
+
+    const userData = JSON.parse(currentUser);
+    setUserId(userData.userId);
+  }, [router]);
+
+  useEffect(() => {
+    if (!userId) return;
 
     async function fetchConnections() {
       try {
@@ -87,7 +94,7 @@ export default function ConnectionsPage() {
                   </div>
                   <div className="mt-4">
                     <button
-                      onClick={() => window.location.href = `/chat/${connection.id}?userId=${userId}`}
+                      onClick={() => router.push(`/chat/${connection.id}`)}
                       className="bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700"
                     >
                       Send Message

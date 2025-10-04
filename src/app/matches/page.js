@@ -1,23 +1,30 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useSearchParams } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 
 export default function MatchesPage() {
-  const searchParams = useSearchParams();
-  const userId = searchParams.get('userId');
-
+  const router = useRouter();
+  const [userId, setUserId] = useState(null);
   const [matches, setMatches] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [connectingTo, setConnectingTo] = useState(null);
 
   useEffect(() => {
-    if (!userId) {
-      setError('User ID is required');
-      setLoading(false);
+    // Get userId from localStorage
+    const currentUser = localStorage.getItem('currentUser');
+    if (!currentUser) {
+      router.push('/');
       return;
     }
+
+    const userData = JSON.parse(currentUser);
+    setUserId(userData.userId);
+  }, [router]);
+
+  useEffect(() => {
+    if (!userId) return;
 
     async function fetchMatches() {
       try {
