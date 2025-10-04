@@ -1,31 +1,32 @@
-'use client';
 
-import { useState, useEffect } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+"use client";
 
-export default function ProfileSetup() {
+import { useState, useEffect, Suspense } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+
+function ProfileSetupInner() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [courses, setCourses] = useState('');
-  const [interests, setInterests] = useState('');
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [courses, setCourses] = useState("");
+  const [interests, setInterests] = useState("");
   const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState('');
+  const [message, setMessage] = useState("");
 
   useEffect(() => {
     // Get user info from localStorage or URL params
-    const currentUser = localStorage.getItem('currentUser');
+    const currentUser = localStorage.getItem("currentUser");
     if (currentUser) {
       const userData = JSON.parse(currentUser);
-      setEmail(userData.email || '');
-      setName(userData.name || '');
+      setEmail(userData.email || "");
+      setName(userData.name || "");
     } else {
-      const emailParam = searchParams.get('email');
+      const emailParam = searchParams.get("email");
       if (emailParam) {
         setEmail(emailParam);
-        setName(emailParam.split('@')[0]);
+        setName(emailParam.split("@")[0]);
       }
     }
   }, [searchParams]);
@@ -33,24 +34,24 @@ export default function ProfileSetup() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-    setMessage('');
+    setMessage("");
 
     try {
-      const coursesArray = courses.split(',').map(c => c.trim()).filter(Boolean);
-      const interestsArray = interests.split(',').map(i => i.trim()).filter(Boolean);
+      const coursesArray = courses.split(",").map((c) => c.trim()).filter(Boolean);
+      const interestsArray = interests.split(",").map((i) => i.trim()).filter(Boolean);
 
       // Get userId from localStorage or create new one
       let userId;
-      const currentUser = localStorage.getItem('currentUser');
+      const currentUser = localStorage.getItem("currentUser");
       if (currentUser) {
         userId = JSON.parse(currentUser).userId;
       } else {
-        userId = email.split('@')[0] + '-' + Date.now();
+        userId = email.split("@")[0] + "-" + Date.now();
       }
 
-      const response = await fetch('/api/profile', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+      const response = await fetch("/api/profile", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           userId,
           name,
@@ -63,23 +64,26 @@ export default function ProfileSetup() {
 
       if (response.ok) {
         // Update localStorage with complete user info
-        localStorage.setItem('currentUser', JSON.stringify({
-          userId,
-          name,
-          email,
-          hasProfile: true,
-        }));
+        localStorage.setItem(
+          "currentUser",
+          JSON.stringify({
+            userId,
+            name,
+            email,
+            hasProfile: true,
+          })
+        );
 
-        setMessage('Profile saved successfully! Redirecting...');
+        setMessage("Profile saved successfully! Redirecting...");
         setTimeout(() => {
           router.push(`/matches?userId=${userId}`);
         }, 1000);
       } else {
-        setMessage('Failed to save profile');
+        setMessage("Failed to save profile");
         setLoading(false);
       }
     } catch (error) {
-      setMessage('Error saving profile');
+      setMessage("Error saving profile");
       setLoading(false);
     }
   };
@@ -167,15 +171,23 @@ export default function ProfileSetup() {
             disabled={loading}
             className="w-full bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700 disabled:opacity-50"
           >
-            {loading ? 'Saving...' : 'Save Profile'}
+            {loading ? "Saving..." : "Save Profile"}
           </button>
           {message && (
-            <p className={`text-sm ${message.includes('success') ? 'text-green-600' : 'text-red-600'}`}>
+            <p className={`text-sm ${message.includes("success") ? "text-green-600" : "text-red-600"}`}>
               {message}
             </p>
           )}
         </form>
       </div>
     </div>
+  );
+}
+
+export default function ProfileSetup() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <ProfileSetupInner />
+    </Suspense>
   );
 }
