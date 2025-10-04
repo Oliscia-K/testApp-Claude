@@ -156,3 +156,65 @@ test('Match score prioritizes course overlap', async ({ request }) => {
   expect(user3Match.match_score).toBe(2); // 1 course * 2 = 2
   expect(user2Match.match_score).toBeGreaterThan(user3Match.match_score);
 });
+
+test('User sees list of suggested matches on /matches page', async ({ page, request }) => {
+  const timestamp = Date.now();
+
+  // Create a test user profile
+  await request.post('/api/profile', {
+    data: {
+      userId: 'match-page-user-' + timestamp,
+      courses: ['CS101'],
+      interests: ['Web Dev']
+    }
+  });
+
+  // Create a potential match
+  await request.post('/api/profile', {
+    data: {
+      userId: 'match-page-match-' + timestamp,
+      courses: ['CS101', 'CS202'],
+      interests: ['AI']
+    }
+  });
+
+  // Visit matches page (we'll pass userId as query param for now)
+  await page.goto(`/matches?userId=match-page-user-${timestamp}`);
+
+  // Check that we can see match suggestions
+  await expect(page.locator('text=Matches')).toBeVisible();
+  // Should have at least 1 match (the one we just created)
+  // Wait for match cards to appear
+  await page.waitForSelector('[data-testid="match-card"]', { timeout: 5000 });
+  const matchCount = await page.locator('[data-testid="match-card"]').count();
+  expect(matchCount).toBeGreaterThanOrEqual(1);
+});
+
+test('Each match shows shared courses/interests', async ({ page, request }) => {
+  const timestamp = Date.now();
+
+  // Create test user
+  await request.post('/api/profile', {
+    data: {
+      userId: 'detail-user-' + timestamp,
+      courses: ['CS101', 'MATH201'],
+      interests: ['AI']
+    }
+  });
+
+  // Create match with shared info
+  await request.post('/api/profile', {
+    data: {
+      userId: 'detail-match-' + timestamp,
+      courses: ['CS101'],
+      interests: ['AI', 'Robotics']
+    }
+  });
+
+  // Visit matches page
+  await page.goto(`/matches?userId=detail-user-${timestamp}`);
+
+  // Check that shared courses/interests are displayed
+  await expect(page.locator('text=CS101').first()).toBeVisible();
+  await expect(page.locator('text=AI').first()).toBeVisible();
+});

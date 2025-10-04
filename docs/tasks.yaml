@@ -58,7 +58,7 @@ tasks:
     definition_of_done:
       - Matches page displays suggestions
       - Tests pass locally
-    status: todo
+    status: completed
 
   - id: T-7
     title: Send connection request
