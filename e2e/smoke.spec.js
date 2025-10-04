@@ -258,3 +258,47 @@ test('Recipient can see pending request', async ({ request }) => {
   expect(pendingRequest).toBeDefined();
   expect(pendingRequest.status).toBe('pending');
 });
+
+test('POST /api/connections/:id/accept updates status to accepted', async ({ request }) => {
+  const timestamp = Date.now();
+  const requesterId = 'req-accept-' + timestamp;
+  const recipientId = 'rec-accept-' + timestamp;
+
+  // Create connection request
+  const createResponse = await request.post('/api/connections/request', {
+    data: { requesterId, recipientId }
+  });
+  const createData = await createResponse.json();
+  const connectionId = createData.connection.id;
+
+  // Accept the request
+  const acceptResponse = await request.post(`/api/connections/${connectionId}/accept`, {
+    data: {}
+  });
+
+  expect(acceptResponse.status()).toBe(200);
+  const acceptData = await acceptResponse.json();
+  expect(acceptData.connection.status).toBe('accepted');
+});
+
+test('POST /api/connections/:id/reject updates status to rejected', async ({ request }) => {
+  const timestamp = Date.now();
+  const requesterId = 'req-reject-' + timestamp;
+  const recipientId = 'rec-reject-' + timestamp;
+
+  // Create connection request
+  const createResponse = await request.post('/api/connections/request', {
+    data: { requesterId, recipientId }
+  });
+  const createData = await createResponse.json();
+  const connectionId = createData.connection.id;
+
+  // Reject the request
+  const rejectResponse = await request.post(`/api/connections/${connectionId}/reject`, {
+    data: {}
+  });
+
+  expect(rejectResponse.status()).toBe(200);
+  const rejectData = await rejectResponse.json();
+  expect(rejectData.connection.status).toBe('rejected');
+});

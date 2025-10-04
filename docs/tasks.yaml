@@ -78,7 +78,7 @@ tasks:
     definition_of_done:
       - Accept/reject endpoints work
       - Tests pass locally
-    status: todo
+    status: completed
 
   - id: T-9
     title: View active connections list
