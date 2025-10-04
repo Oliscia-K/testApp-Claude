@@ -302,3 +302,51 @@ test('POST /api/connections/:id/reject updates status to rejected', async ({ req
   const rejectData = await rejectResponse.json();
   expect(rejectData.connection.status).toBe('rejected');
 });
+
+test('GET /api/connections returns accepted connections', async ({ request }) => {
+  const timestamp = Date.now();
+  const user1 = 'conn-user-1-' + timestamp;
+  const user2 = 'conn-user-2-' + timestamp;
+
+  // Create and accept connection
+  const createResponse = await request.post('/api/connections/request', {
+    data: { requesterId: user1, recipientId: user2 }
+  });
+  const createData = await createResponse.json();
+  await request.post(`/api/connections/${createData.connection.id}/accept`, { data: {} });
+
+  // Get accepted connections for user1
+  const response = await request.get(`/api/connections?userId=${user1}&status=accepted`);
+  expect(response.status()).toBe(200);
+  const data = await response.json();
+
+  expect(data.connections.length).toBeGreaterThanOrEqual(1);
+  const acceptedConnection = data.connections.find(c =>
+    (c.requester_id === user1 && c.recipient_id === user2) ||
+    (c.requester_id === user2 && c.recipient_id === user1)
+  );
+  expect(acceptedConnection).toBeDefined();
+  expect(acceptedConnection.status).toBe('accepted');
+});
+
+test('/connections page displays active connections', async ({ page, request }) => {
+  const timestamp = Date.now();
+  const userId = 'page-user-' + timestamp;
+  const connectedUser = 'connected-' + timestamp;
+
+  // Create and accept connection
+  const createResponse = await request.post('/api/connections/request', {
+    data: { requesterId: userId, recipientId: connectedUser }
+  });
+  const createData = await createResponse.json();
+  await request.post(`/api/connections/${createData.connection.id}/accept`, { data: {} });
+
+  // Visit connections page
+  await page.goto(`/connections?userId=${userId}`);
+  await expect(page.locator('text=Connections')).toBeVisible();
+
+  // Wait for connections to load
+  await page.waitForSelector('[data-testid="connection-card"]', { timeout: 5000 });
+  const connectionCount = await page.locator('[data-testid="connection-card"]').count();
+  expect(connectionCount).toBeGreaterThanOrEqual(1);
+});

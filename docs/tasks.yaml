@@ -88,7 +88,7 @@ tasks:
     definition_of_done:
       - Connections list page works
       - Tests pass locally
-    status: todo
+    status: completed
 
   - id: T-10
     title: Edit profile and refresh matches
