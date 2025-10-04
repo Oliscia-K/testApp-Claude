@@ -1,8 +1,10 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 
 export default function ProfileSetup() {
+  const router = useRouter();
   const [courses, setCourses] = useState('');
   const [interests, setInterests] = useState('');
   const [loading, setLoading] = useState(false);
@@ -17,24 +19,30 @@ export default function ProfileSetup() {
       const coursesArray = courses.split(',').map(c => c.trim()).filter(Boolean);
       const interestsArray = interests.split(',').map(i => i.trim()).filter(Boolean);
 
+      const userId = 'user-' + Date.now(); // Temporary until auth is implemented
+
       const response = await fetch('/api/profile', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          userId: 'user-' + Date.now(), // Temporary until auth is implemented
+          userId,
           courses: coursesArray,
           interests: interestsArray,
         }),
       });
 
       if (response.ok) {
-        setMessage('Profile saved successfully!');
+        setMessage('Profile saved successfully! Redirecting...');
+        // Redirect to matches page after 1 second
+        setTimeout(() => {
+          router.push(`/matches?userId=${userId}`);
+        }, 1000);
       } else {
         setMessage('Failed to save profile');
+        setLoading(false);
       }
     } catch (error) {
       setMessage('Error saving profile');
-    } finally {
       setLoading(false);
     }
   };
