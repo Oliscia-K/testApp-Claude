@@ -98,7 +98,7 @@ tasks:
     definition_of_done:
       - Profile edit functionality works
       - Tests pass locally
-    status: todo
+    status: completed
 
   - id: T-11
     title: Basic chat interface

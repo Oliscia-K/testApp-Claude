@@ -350,3 +350,75 @@ test('/connections page displays active connections', async ({ page, request }) 
   const connectionCount = await page.locator('[data-testid="connection-card"]').count();
   expect(connectionCount).toBeGreaterThanOrEqual(1);
 });
+
+test('PUT /api/profile updates courses/interests', async ({ request }) => {
+  const timestamp = Date.now();
+  const userId = 'edit-user-' + timestamp;
+
+  // Create initial profile
+  await request.post('/api/profile', {
+    data: {
+      userId,
+      courses: ['CS101'],
+      interests: ['AI']
+    }
+  });
+
+  // Update profile
+  const updateResponse = await request.post('/api/profile', {
+    data: {
+      userId,
+      courses: ['CS101', 'CS202'],
+      interests: ['AI', 'Web Dev']
+    }
+  });
+
+  expect(updateResponse.status()).toBe(201);
+
+  // Verify update
+  const getResponse = await request.get(`/api/profile?userId=${userId}`);
+  const data = await getResponse.json();
+  expect(data.courses).toEqual(['CS101', 'CS202']);
+  expect(data.interests).toEqual(['AI', 'Web Dev']);
+});
+
+test('Match suggestions refresh after profile update', async ({ request }) => {
+  const timestamp = Date.now();
+  const userId = 'refresh-user-' + timestamp;
+  const matchUser1 = 'match-cs-' + timestamp;
+  const matchUser2 = 'match-math-' + timestamp;
+
+  // Create user with CS101
+  await request.post('/api/profile', {
+    data: { userId, courses: ['CS101'], interests: [] }
+  });
+
+  // Create potential matches
+  await request.post('/api/profile', {
+    data: { userId: matchUser1, courses: ['CS101'], interests: [] }
+  });
+  await request.post('/api/profile', {
+    data: { userId: matchUser2, courses: ['MATH201'], interests: [] }
+  });
+
+  // Get initial matches (should only have CS match)
+  const initialMatches = await request.get(`/api/matches?userId=${userId}`);
+  const initialData = await initialMatches.json();
+  const hasCSMatch = initialData.matches.some(m => m.user_id === matchUser1);
+  const hasMathMatch = initialData.matches.some(m => m.user_id === matchUser2);
+  expect(hasCSMatch).toBe(true);
+  expect(hasMathMatch).toBe(false);
+
+  // Update profile to include MATH201
+  await request.post('/api/profile', {
+    data: { userId, courses: ['CS101', 'MATH201'], interests: [] }
+  });
+
+  // Get updated matches (should now have both)
+  const updatedMatches = await request.get(`/api/matches?userId=${userId}`);
+  const updatedData = await updatedMatches.json();
+  const hasCSMatchAfter = updatedData.matches.some(m => m.user_id === matchUser1);
+  const hasMathMatchAfter = updatedData.matches.some(m => m.user_id === matchUser2);
+  expect(hasCSMatchAfter).toBe(true);
+  expect(hasMathMatchAfter).toBe(true);
+});
