@@ -108,7 +108,7 @@ tasks:
     definition_of_done:
       - Chat UI renders
       - Tests pass locally
-    status: todo
+    status: completed
 
   - id: T-12
     title: Send and receive messages
@@ -118,4 +118,4 @@ tasks:
     definition_of_done:
       - Messaging endpoints work
       - Tests pass locally
-    status: todo
+    status: completed

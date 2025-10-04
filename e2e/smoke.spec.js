@@ -422,3 +422,113 @@ test('Match suggestions refresh after profile update', async ({ request }) => {
   expect(hasCSMatchAfter).toBe(true);
   expect(hasMathMatchAfter).toBe(true);
 });
+
+test('Connected users can access /chat/:connectionId', async ({ page, request }) => {
+  const timestamp = Date.now();
+  const user1 = 'chat-user-1-' + timestamp;
+  const user2 = 'chat-user-2-' + timestamp;
+
+  // Create and accept connection
+  const createResponse = await request.post('/api/connections/request', {
+    data: { requesterId: user1, recipientId: user2 }
+  });
+  const createData = await createResponse.json();
+  const connectionId = createData.connection.id;
+  await request.post(`/api/connections/${connectionId}/accept`, { data: {} });
+
+  // Visit chat page
+  await page.goto(`/chat/${connectionId}?userId=${user1}`);
+  await expect(page.locator('text=Chat')).toBeVisible();
+});
+
+test('Messages display in chronological order', async ({ page, request }) => {
+  const timestamp = Date.now();
+  const user1 = 'msg-user-1-' + timestamp;
+  const user2 = 'msg-user-2-' + timestamp;
+
+  // Create and accept connection
+  const createResponse = await request.post('/api/connections/request', {
+    data: { requesterId: user1, recipientId: user2 }
+  });
+  const createData = await createResponse.json();
+  const connectionId = createData.connection.id;
+  await request.post(`/api/connections/${connectionId}/accept`, { data: {} });
+
+  // Send messages
+  await request.post(`/api/chat/${connectionId}/messages`, {
+    data: { senderId: user1, message: 'First message' }
+  });
+  await request.post(`/api/chat/${connectionId}/messages`, {
+    data: { senderId: user2, message: 'Second message' }
+  });
+
+  // Visit chat page
+  await page.goto(`/chat/${connectionId}?userId=${user1}`);
+
+  // Wait for messages to load
+  await page.waitForSelector('[data-testid="message"]', { timeout: 5000 });
+
+  // Check messages appear
+  await expect(page.locator('text=First message')).toBeVisible();
+  await expect(page.locator('text=Second message')).toBeVisible();
+});
+
+test('POST /api/chat/:connectionId/messages sends message', async ({ request }) => {
+  const timestamp = Date.now();
+  const user1 = 'send-user-1-' + timestamp;
+  const user2 = 'send-user-2-' + timestamp;
+
+  // Create and accept connection
+  const createResponse = await request.post('/api/connections/request', {
+    data: { requesterId: user1, recipientId: user2 }
+  });
+  const createData = await createResponse.json();
+  const connectionId = createData.connection.id;
+  await request.post(`/api/connections/${connectionId}/accept`, { data: {} });
+
+  // Send message
+  const sendResponse = await request.post(`/api/chat/${connectionId}/messages`, {
+    data: {
+      senderId: user1,
+      message: 'Hello from tests!'
+    }
+  });
+
+  expect(sendResponse.status()).toBe(201);
+  const sendData = await sendResponse.json();
+  expect(sendData.message.message).toBe('Hello from tests!');
+  expect(sendData.message.sender_id).toBe(user1);
+});
+
+test('GET /api/chat/:connectionId/messages retrieves message history', async ({ request }) => {
+  const timestamp = Date.now();
+  const user1 = 'get-user-1-' + timestamp;
+  const user2 = 'get-user-2-' + timestamp;
+
+  // Create and accept connection
+  const createResponse = await request.post('/api/connections/request', {
+    data: { requesterId: user1, recipientId: user2 }
+  });
+  const createData = await createResponse.json();
+  const connectionId = createData.connection.id;
+  await request.post(`/api/connections/${connectionId}/accept`, { data: {} });
+
+  // Send messages
+  await request.post(`/api/chat/${connectionId}/messages`, {
+    data: { senderId: user1, message: 'Message 1' }
+  });
+  await request.post(`/api/chat/${connectionId}/messages`, {
+    data: { senderId: user2, message: 'Message 2' }
+  });
+
+  // Get message history
+  const getResponse = await request.get(`/api/chat/${connectionId}/messages`);
+  expect(getResponse.status()).toBe(200);
+  const getData = await getResponse.json();
+
+  expect(getData.messages.length).toBeGreaterThanOrEqual(2);
+  const msg1 = getData.messages.find(m => m.message === 'Message 1');
+  const msg2 = getData.messages.find(m => m.message === 'Message 2');
+  expect(msg1).toBeDefined();
+  expect(msg2).toBeDefined();
+});
