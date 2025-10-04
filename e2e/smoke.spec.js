@@ -159,11 +159,12 @@ test('Match score prioritizes course overlap', async ({ request }) => {
 
 test('User sees list of suggested matches on /matches page', async ({ page, request }) => {
   const timestamp = Date.now();
+  const userId = 'match-page-user-' + timestamp;
 
   // Create a test user profile
   await request.post('/api/profile', {
     data: {
-      userId: 'match-page-user-' + timestamp,
+      userId,
       courses: ['CS101'],
       interests: ['Web Dev']
     }
@@ -178,8 +179,14 @@ test('User sees list of suggested matches on /matches page', async ({ page, requ
     }
   });
 
-  // Visit matches page (we'll pass userId as query param for now)
-  await page.goto(`/matches?userId=match-page-user-${timestamp}`);
+  // Set localStorage to authenticate user
+  await page.goto('/');
+  await page.evaluate((userData) => {
+    localStorage.setItem('currentUser', JSON.stringify(userData));
+  }, { userId, email: `${userId}@test.edu`, name: userId, hasProfile: true });
+
+  // Visit matches page
+  await page.goto('/matches');
 
   // Check that we can see match suggestions
   await expect(page.locator('text=Matches')).toBeVisible();
@@ -192,11 +199,12 @@ test('User sees list of suggested matches on /matches page', async ({ page, requ
 
 test('Each match shows shared courses/interests', async ({ page, request }) => {
   const timestamp = Date.now();
+  const userId = 'detail-user-' + timestamp;
 
   // Create test user
   await request.post('/api/profile', {
     data: {
-      userId: 'detail-user-' + timestamp,
+      userId,
       courses: ['CS101', 'MATH201'],
       interests: ['AI']
     }
@@ -211,8 +219,14 @@ test('Each match shows shared courses/interests', async ({ page, request }) => {
     }
   });
 
+  // Set localStorage to authenticate user
+  await page.goto('/');
+  await page.evaluate((userData) => {
+    localStorage.setItem('currentUser', JSON.stringify(userData));
+  }, { userId, email: `${userId}@test.edu`, name: userId, hasProfile: true });
+
   // Visit matches page
-  await page.goto(`/matches?userId=detail-user-${timestamp}`);
+  await page.goto('/matches');
 
   // Check that shared courses/interests are displayed
   await expect(page.locator('text=CS101').first()).toBeVisible();
@@ -341,8 +355,14 @@ test('/connections page displays active connections', async ({ page, request }) 
   const createData = await createResponse.json();
   await request.post(`/api/connections/${createData.connection.id}/accept`, { data: {} });
 
+  // Set localStorage to authenticate user
+  await page.goto('/');
+  await page.evaluate((userData) => {
+    localStorage.setItem('currentUser', JSON.stringify(userData));
+  }, { userId, email: `${userId}@test.edu`, name: userId, hasProfile: true });
+
   // Visit connections page
-  await page.goto(`/connections?userId=${userId}`);
+  await page.goto('/connections');
   await expect(page.locator('text=Connections')).toBeVisible();
 
   // Wait for connections to load
@@ -436,8 +456,14 @@ test('Connected users can access /chat/:connectionId', async ({ page, request })
   const connectionId = createData.connection.id;
   await request.post(`/api/connections/${connectionId}/accept`, { data: {} });
 
+  // Set localStorage to authenticate user
+  await page.goto('/');
+  await page.evaluate((userData) => {
+    localStorage.setItem('currentUser', JSON.stringify(userData));
+  }, { userId: user1, email: `${user1}@test.edu`, name: user1, hasProfile: true });
+
   // Visit chat page
-  await page.goto(`/chat/${connectionId}?userId=${user1}`);
+  await page.goto(`/chat/${connectionId}`);
   await expect(page.locator('text=Chat')).toBeVisible();
 });
 
@@ -462,8 +488,14 @@ test('Messages display in chronological order', async ({ page, request }) => {
     data: { senderId: user2, message: 'Second message' }
   });
 
+  // Set localStorage to authenticate user
+  await page.goto('/');
+  await page.evaluate((userData) => {
+    localStorage.setItem('currentUser', JSON.stringify(userData));
+  }, { userId: user1, email: `${user1}@test.edu`, name: user1, hasProfile: true });
+
   // Visit chat page
-  await page.goto(`/chat/${connectionId}?userId=${user1}`);
+  await page.goto(`/chat/${connectionId}`);
 
   // Wait for messages to load
   await page.waitForSelector('[data-testid="message"]', { timeout: 5000 });
