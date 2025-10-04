@@ -48,7 +48,7 @@ tasks:
     definition_of_done:
       - Matching logic implemented
       - Tests pass locally
-    status: todo
+    status: completed
 
   - id: T-6
     title: Display match suggestions UI
