@@ -218,3 +218,43 @@ test('Each match shows shared courses/interests', async ({ page, request }) => {
   await expect(page.locator('text=CS101').first()).toBeVisible();
   await expect(page.locator('text=AI').first()).toBeVisible();
 });
+
+test('POST /api/connections/request creates pending connection', async ({ request }) => {
+  const timestamp = Date.now();
+  const requesterId = 'requester-' + timestamp;
+  const recipientId = 'recipient-' + timestamp;
+
+  const response = await request.post('/api/connections/request', {
+    data: {
+      requesterId,
+      recipientId
+    }
+  });
+
+  expect(response.status()).toBe(201);
+  const data = await response.json();
+  expect(data.connection.status).toBe('pending');
+  expect(data.connection.requester_id).toBe(requesterId);
+  expect(data.connection.recipient_id).toBe(recipientId);
+});
+
+test('Recipient can see pending request', async ({ request }) => {
+  const timestamp = Date.now();
+  const requesterId = 'req2-' + timestamp;
+  const recipientId = 'rec2-' + timestamp;
+
+  // Create connection request
+  await request.post('/api/connections/request', {
+    data: { requesterId, recipientId }
+  });
+
+  // Get recipient's pending requests
+  const response = await request.get(`/api/connections?userId=${recipientId}&status=pending`);
+  expect(response.status()).toBe(200);
+  const data = await response.json();
+
+  expect(data.connections.length).toBeGreaterThanOrEqual(1);
+  const pendingRequest = data.connections.find(c => c.requester_id === requesterId);
+  expect(pendingRequest).toBeDefined();
+  expect(pendingRequest.status).toBe('pending');
+});

@@ -10,6 +10,7 @@ export default function MatchesPage() {
   const [matches, setMatches] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [connectingTo, setConnectingTo] = useState(null);
 
   useEffect(() => {
     if (!userId) {
@@ -36,6 +37,30 @@ export default function MatchesPage() {
 
     fetchMatches();
   }, [userId]);
+
+  const handleConnect = async (recipientId) => {
+    setConnectingTo(recipientId);
+    try {
+      const response = await fetch('/api/connections/request', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          requesterId: userId,
+          recipientId,
+        }),
+      });
+
+      if (response.ok) {
+        alert('Connection request sent!');
+      } else {
+        alert('Failed to send connection request');
+      }
+    } catch (err) {
+      alert('Error sending connection request');
+    } finally {
+      setConnectingTo(null);
+    }
+  };
 
   if (loading) {
     return (
@@ -97,7 +122,7 @@ export default function MatchesPage() {
                 )}
 
                 {match.interests && match.interests.length > 0 && (
-                  <div>
+                  <div className="mb-4">
                     <h3 className="text-sm font-medium text-gray-700 mb-2">Interests:</h3>
                     <div className="flex flex-wrap gap-2">
                       {match.interests.map((interest, idx) => (
@@ -111,6 +136,14 @@ export default function MatchesPage() {
                     </div>
                   </div>
                 )}
+
+                <button
+                  onClick={() => handleConnect(match.user_id)}
+                  disabled={connectingTo === match.user_id}
+                  className="w-full bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700 disabled:opacity-50"
+                >
+                  {connectingTo === match.user_id ? 'Sending...' : 'Send Connection Request'}
+                </button>
               </div>
             ))}
           </div>

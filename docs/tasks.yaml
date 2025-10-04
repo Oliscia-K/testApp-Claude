@@ -68,7 +68,7 @@ tasks:
     definition_of_done:
       - Connection request endpoint works
       - Tests pass locally
-    status: todo
+    status: completed
 
   - id: T-8
     title: Accept/reject connection requests
