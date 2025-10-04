@@ -188,8 +188,8 @@ test('User sees list of suggested matches on /matches page', async ({ page, requ
   // Visit matches page
   await page.goto('/matches');
 
-  // Check that we can see match suggestions
-  await expect(page.locator('text=Matches')).toBeVisible();
+  // Check that we can see match suggestions (use h1 to avoid navigation link)
+  await expect(page.locator('h1:has-text("Matches")')).toBeVisible();
   // Should have at least 1 match (the one we just created)
   // Wait for match cards to appear
   await page.waitForSelector('[data-testid="match-card"]', { timeout: 5000 });
@@ -363,7 +363,7 @@ test('/connections page displays active connections', async ({ page, request }) 
 
   // Visit connections page
   await page.goto('/connections');
-  await expect(page.locator('text=Connections')).toBeVisible();
+  await expect(page.locator('h1:has-text("Connections")')).toBeVisible();
 
   // Wait for connections to load
   await page.waitForSelector('[data-testid="connection-card"]', { timeout: 5000 });
@@ -464,7 +464,7 @@ test('Connected users can access /chat/:connectionId', async ({ page, request })
 
   // Visit chat page
   await page.goto(`/chat/${connectionId}`);
-  await expect(page.locator('text=Chat')).toBeVisible();
+  await expect(page.locator('h1:has-text("Chat")')).toBeVisible();
 });
 
 test('Messages display in chronological order', async ({ page, request }) => {
