@@ -18,7 +18,7 @@ tasks:
     definition_of_done:
       - Email verification endpoint exists
       - Tests pass locally
-    status: todo
+    status: completed
 
   - id: T-3
     title: User profile creation page
