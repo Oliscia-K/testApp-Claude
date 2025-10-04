@@ -1,0 +1,121 @@
+version: 1
+workflow: tests-first
+tasks:
+  - id: T-1
+    title: Scaffold + health route
+    acceptance_tests:
+      - "GET /health returns 200"
+    definition_of_done:
+      - Dev server runs locally
+      - Test passes locally
+    status: completed
+
+  - id: T-2
+    title: Auth - email verification setup
+    acceptance_tests:
+      - "POST /api/auth/verify-email with valid .edu email returns 200"
+      - "POST /api/auth/verify-email with non-.edu email returns 400"
+    definition_of_done:
+      - Email verification endpoint exists
+      - Tests pass locally
+    status: todo
+
+  - id: T-3
+    title: User profile creation page
+    acceptance_tests:
+      - "User can navigate to /profile/setup after auth"
+      - "Form displays course and interest input fields"
+    definition_of_done:
+      - Profile setup page renders
+      - Tests pass locally
+    status: todo
+
+  - id: T-4
+    title: Save user courses and interests
+    acceptance_tests:
+      - "POST /api/profile with courses & interests returns 201"
+      - "Saved data persists and can be retrieved"
+    definition_of_done:
+      - Profile data saves to database
+      - Tests pass locally
+    status: todo
+
+  - id: T-5
+    title: Basic matching algorithm
+    acceptance_tests:
+      - "GET /api/matches returns users with shared courses"
+      - "Match score prioritizes course overlap"
+    definition_of_done:
+      - Matching logic implemented
+      - Tests pass locally
+    status: todo
+
+  - id: T-6
+    title: Display match suggestions UI
+    acceptance_tests:
+      - "User sees list of suggested matches on /matches page"
+      - "Each match shows shared courses/interests"
+    definition_of_done:
+      - Matches page displays suggestions
+      - Tests pass locally
+    status: todo
+
+  - id: T-7
+    title: Send connection request
+    acceptance_tests:
+      - "POST /api/connections/request creates pending connection"
+      - "Recipient can see pending request"
+    definition_of_done:
+      - Connection request endpoint works
+      - Tests pass locally
+    status: todo
+
+  - id: T-8
+    title: Accept/reject connection requests
+    acceptance_tests:
+      - "POST /api/connections/:id/accept updates status to 'accepted'"
+      - "POST /api/connections/:id/reject updates status to 'rejected'"
+    definition_of_done:
+      - Accept/reject endpoints work
+      - Tests pass locally
+    status: todo
+
+  - id: T-9
+    title: View active connections list
+    acceptance_tests:
+      - "GET /api/connections returns accepted connections"
+      - "/connections page displays active connections"
+    definition_of_done:
+      - Connections list page works
+      - Tests pass locally
+    status: todo
+
+  - id: T-10
+    title: Edit profile and refresh matches
+    acceptance_tests:
+      - "PUT /api/profile updates courses/interests"
+      - "Match suggestions refresh after profile update"
+    definition_of_done:
+      - Profile edit functionality works
+      - Tests pass locally
+    status: todo
+
+  - id: T-11
+    title: Basic chat interface
+    acceptance_tests:
+      - "Connected users can access /chat/:connectionId"
+      - "Messages display in chronological order"
+    definition_of_done:
+      - Chat UI renders
+      - Tests pass locally
+    status: todo
+
+  - id: T-12
+    title: Send and receive messages
+    acceptance_tests:
+      - "POST /api/chat/:connectionId/messages sends message"
+      - "GET /api/chat/:connectionId/messages retrieves message history"
+    definition_of_done:
+      - Messaging endpoints work
+      - Tests pass locally
+    status: todo

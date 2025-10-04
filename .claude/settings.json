@@ -1,0 +1,17 @@
+{
+  "permissions": {
+    "allow": [
+      "Edit(**/*)", "Read(**/*)",
+      "Bash(git add *)", "Bash(git commit -m *)", "Bash(git push*)",
+      "Bash(gh auth *)", "Bash(gh repo *)",
+      "Bash(vercel login)", "Bash(vercel link)",
+      "Bash(vercel env add *)", "Bash(vercel deploy*)",
+      "Bash(vercel logs *)", "Bash(vercel inspect *)", "Bash(vercel build)",
+      "Bash(npm run ci)", "Bash(npm run build)",
+      "Bash(npx shadcn*)",
+      "mcp__playwright__browser_*",
+      "mcp__neon__query"
+    ],
+    "deny": ["Bash(rm -rf *)", "Read(.env*)", "Read(secrets/**)"]
+  }
+}
