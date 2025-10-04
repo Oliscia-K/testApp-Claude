@@ -129,6 +129,10 @@ export default function PendingConnectionsPage() {
                   ? request.recipient_id
                   : request.requester_id;
 
+                const requesterName = request.requester_id === userId
+                  ? (request.recipient_name || request.recipient_id)
+                  : (request.requester_name || request.requester_id);
+
                 return (
                   <div
                     key={request.id}
@@ -137,7 +141,7 @@ export default function PendingConnectionsPage() {
                   >
                     <div className="flex justify-between items-center">
                       <div>
-                        <h2 className="text-xl font-semibold">{requesterId}</h2>
+                        <h2 className="text-xl font-semibold">{requesterName}</h2>
                         <p className="text-sm text-gray-500">
                           Requested {new Date(request.created_at).toLocaleDateString()}
                         </p>

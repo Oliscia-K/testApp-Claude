@@ -34,6 +34,7 @@ export async function GET(request) {
     const matchesRaw = await sql`
       SELECT
         user_id,
+        name,
         email,
         courses,
         interests,

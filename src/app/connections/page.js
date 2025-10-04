@@ -84,6 +84,10 @@ export default function ConnectionsPage() {
                 ? connection.recipient_id
                 : connection.requester_id;
 
+              const otherUserName = connection.requester_id === userId
+                ? (connection.recipient_name || connection.recipient_id)
+                : (connection.requester_name || connection.requester_id);
+
               return (
                 <div
                   key={connection.id}
@@ -92,7 +96,7 @@ export default function ConnectionsPage() {
                 >
                   <div className="flex justify-between items-center">
                     <div>
-                      <h2 className="text-xl font-semibold">{otherUserId}</h2>
+                      <h2 className="text-xl font-semibold">{otherUserName}</h2>
                       <p className="text-sm text-gray-500">
                         Connected {new Date(connection.created_at).toLocaleDateString()}
                       </p>

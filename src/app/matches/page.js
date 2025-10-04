@@ -111,7 +111,7 @@ export default function MatchesPage() {
               >
                 <div className="flex justify-between items-start mb-4">
                   <div>
-                    <h2 className="text-xl font-semibold">{match.user_id}</h2>
+                    <h2 className="text-xl font-semibold">{match.name || match.user_id}</h2>
                     {match.email && (
                       <p className="text-sm text-gray-600">{match.email}</p>
                     )}
