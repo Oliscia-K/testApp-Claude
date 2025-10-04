@@ -5,11 +5,38 @@ import { useState } from 'react';
 export default function ProfileSetup() {
   const [courses, setCourses] = useState('');
   const [interests, setInterests] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState('');
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    // Will be implemented in next task
-    console.log({ courses, interests });
+    setLoading(true);
+    setMessage('');
+
+    try {
+      const coursesArray = courses.split(',').map(c => c.trim()).filter(Boolean);
+      const interestsArray = interests.split(',').map(i => i.trim()).filter(Boolean);
+
+      const response = await fetch('/api/profile', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          userId: 'user-' + Date.now(), // Temporary until auth is implemented
+          courses: coursesArray,
+          interests: interestsArray,
+        }),
+      });
+
+      if (response.ok) {
+        setMessage('Profile saved successfully!');
+      } else {
+        setMessage('Failed to save profile');
+      }
+    } catch (error) {
+      setMessage('Error saving profile');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -47,10 +74,16 @@ export default function ProfileSetup() {
           </div>
           <button
             type="submit"
-            className="w-full bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700"
+            disabled={loading}
+            className="w-full bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700 disabled:opacity-50"
           >
-            Save Profile
+            {loading ? 'Saving...' : 'Save Profile'}
           </button>
+          {message && (
+            <p className={`text-sm ${message.includes('success') ? 'text-green-600' : 'text-red-600'}`}>
+              {message}
+            </p>
+          )}
         </form>
       </div>
     </div>

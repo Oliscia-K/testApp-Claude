@@ -38,7 +38,7 @@ tasks:
     definition_of_done:
       - Profile data saves to database
       - Tests pass locally
-    status: todo
+    status: completed
 
   - id: T-5
     title: Basic matching algorithm
