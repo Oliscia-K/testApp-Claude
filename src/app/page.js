@@ -73,7 +73,7 @@ export default function Home() {
 
           {/* Login Form */}
           <div className="max-w-md mx-auto bg-white p-8 rounded-lg shadow-lg mb-8">
-            <h2 className="text-2xl font-semibold mb-4">Sign In with Your .edu Email</h2>
+            <h2 className="text-2xl font-semibold text-gray-900 mb-4">Sign In with Your .edu Email</h2>
             <form onSubmit={handleLogin} className="space-y-4">
               <input
                 type="email"
@@ -81,7 +81,7 @@ export default function Home() {
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="your.email@university.edu"
                 required
-                className="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-4 py-3 border rounded-lg text-gray-900 placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
               {error && (
                 <p className="text-red-600 text-sm">{error}</p>
