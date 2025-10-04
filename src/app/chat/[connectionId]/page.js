@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import Navigation from '@/components/Navigation';
 
 export default function ChatPage({ params }) {
   const router = useRouter();
@@ -71,14 +72,19 @@ export default function ChatPage({ params }) {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <p>Loading chat...</p>
-      </div>
+      <>
+        <Navigation />
+        <div className="min-h-screen flex items-center justify-center">
+          <p>Loading chat...</p>
+        </div>
+      </>
     );
   }
 
   return (
-    <div className="min-h-screen flex flex-col p-8">
+    <>
+      <Navigation />
+      <div className="min-h-screen flex flex-col p-8">
       <div className="max-w-4xl mx-auto w-full flex-1 flex flex-col">
         <h1 className="text-3xl font-bold mb-6">Chat</h1>
 
@@ -126,5 +132,6 @@ export default function ChatPage({ params }) {
         </form>
       </div>
     </div>
+    </>
   );
 }

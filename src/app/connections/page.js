@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import Navigation from '@/components/Navigation';
 
 export default function ConnectionsPage() {
   const router = useRouter();
@@ -46,22 +47,30 @@ export default function ConnectionsPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <p>Loading connections...</p>
-      </div>
+      <>
+        <Navigation />
+        <div className="min-h-screen flex items-center justify-center">
+          <p>Loading connections...</p>
+        </div>
+      </>
     );
   }
 
   if (error) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <p className="text-red-600">{error}</p>
-      </div>
+      <>
+        <Navigation />
+        <div className="min-h-screen flex items-center justify-center">
+          <p className="text-red-600">{error}</p>
+        </div>
+      </>
     );
   }
 
   return (
-    <div className="min-h-screen p-8">
+    <>
+      <Navigation />
+      <div className="min-h-screen p-8">
       <div className="max-w-4xl mx-auto">
         <h1 className="text-3xl font-bold mb-8">Connections</h1>
 
@@ -107,5 +116,6 @@ export default function ConnectionsPage() {
         )}
       </div>
     </div>
+    </>
   );
 }

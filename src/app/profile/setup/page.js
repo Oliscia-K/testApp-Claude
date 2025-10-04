@@ -8,6 +8,7 @@ export default function ProfileSetup() {
   const searchParams = useSearchParams();
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [courses, setCourses] = useState('');
   const [interests, setInterests] = useState('');
   const [loading, setLoading] = useState(false);
@@ -54,6 +55,7 @@ export default function ProfileSetup() {
           userId,
           name,
           email,
+          password,
           courses: coursesArray,
           interests: interestsArray,
         }),
@@ -113,6 +115,21 @@ export default function ProfileSetup() {
               value={email}
               readOnly
               className="w-full px-3 py-2 border rounded bg-gray-50"
+            />
+          </div>
+          <div>
+            <label htmlFor="password" className="block text-sm font-medium mb-2">
+              Password
+            </label>
+            <input
+              type="password"
+              id="password"
+              name="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="Choose a password"
+              required
+              className="w-full px-3 py-2 border rounded"
             />
           </div>
           <div>

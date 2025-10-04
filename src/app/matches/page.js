@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import Navigation from '@/components/Navigation';
 
 export default function MatchesPage() {
   const router = useRouter();
@@ -71,22 +72,30 @@ export default function MatchesPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <p>Loading matches...</p>
-      </div>
+      <>
+        <Navigation />
+        <div className="min-h-screen flex items-center justify-center">
+          <p>Loading matches...</p>
+        </div>
+      </>
     );
   }
 
   if (error) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <p className="text-red-600">{error}</p>
-      </div>
+      <>
+        <Navigation />
+        <div className="min-h-screen flex items-center justify-center">
+          <p className="text-red-600">{error}</p>
+        </div>
+      </>
     );
   }
 
   return (
-    <div className="min-h-screen p-8">
+    <>
+      <Navigation />
+      <div className="min-h-screen p-8">
       <div className="max-w-4xl mx-auto">
         <h1 className="text-3xl font-bold mb-8">Matches</h1>
 
@@ -157,5 +166,6 @@ export default function MatchesPage() {
         )}
       </div>
     </div>
+    </>
   );
 }

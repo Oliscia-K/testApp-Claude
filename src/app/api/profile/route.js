@@ -4,7 +4,7 @@ export async function POST(request) {
   const sql = getDb();
 
   try {
-    const { userId, name, courses, interests, email } = await request.json();
+    const { userId, name, courses, interests, email, password } = await request.json();
 
     if (!userId) {
       return new Response(
@@ -15,14 +15,15 @@ export async function POST(request) {
 
     // Insert or update profile
     const result = await sql`
-      INSERT INTO colab_profiles (user_id, name, email, courses, interests)
-      VALUES (${userId}, ${name || null}, ${email || null}, ${courses || []}, ${interests || []})
+      INSERT INTO colab_profiles (user_id, name, email, password, courses, interests)
+      VALUES (${userId}, ${name || null}, ${email || null}, ${password || null}, ${courses || []}, ${interests || []})
       ON CONFLICT (user_id)
       DO UPDATE SET
         name = ${name || null},
         courses = ${courses || []},
         interests = ${interests || []},
         email = ${email || null},
+        password = COALESCE(${password}, colab_profiles.password),
         updated_at = NOW()
       RETURNING *;
     `;
