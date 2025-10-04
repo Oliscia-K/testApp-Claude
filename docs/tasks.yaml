@@ -28,7 +28,7 @@ tasks:
     definition_of_done:
       - Profile setup page renders
       - Tests pass locally
-    status: todo
+    status: completed
 
   - id: T-4
     title: Save user courses and interests
